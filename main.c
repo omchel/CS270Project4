@@ -18,8 +18,7 @@ int main() {
     printf("%s", prompt);
     fgets(prompt, BUF_LEN, stdin);
     strtok(prompt, "\n");
-    strcat(prompt, " > ");
-
+    
   }
 
   return(0);
