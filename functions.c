@@ -1,5 +1,5 @@
 #include <string>
-#include <stdlib>
+#include <stdlib.h>
 #include <unistd.h>
 
 #define VARLENGTH 255
@@ -72,7 +72,7 @@ void showprocs() {
 	finish before it prompts for and accepts the next command.
 */
 void run(int param, string param1) {
-
+	int system(const cha *command);
 }
 /*fly cmd [param ... ]
 	The fly command is identical to the run command, except that
