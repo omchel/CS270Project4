@@ -1,6 +1,8 @@
-#include <string>
+#include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <regex.h>
 
 #define VARLENGTH 255
 /* setvar variable value
@@ -15,33 +17,37 @@
 	this command is to associate the variable name with 
 	the given value in a data structure inside msh.
 */
-void setvar(string varName, int val){
-	if (varName[0] =! ){//check if there is the first thing in the variable name is a letter
-		return;
-	} 
-	if (val > VARLENGTH){
+void setvar(char* varName, char* val){
+	regex_t exp;
+	char var1Letter = regcomp(&exp, "-?[a-zA-z]", 1); //regular expression (A-Z, locks sensitive)
+	if (var1Letter){//check if there is the first thing in the variable name is a letter (if it matches)
 		return;
 	}
-	int varName = val;
+	if (sizeOf(val) > VARLENGTH){
+		return;
+	}
+	set -e varName  val;
+	printf("Variable created: %s, %s", varName, val);
 }
 /* setprompt newPrompt
 	Set the shell prompt to newPrompt, which is a token. Do not 
 	add or subtract spaces at the end of the new prompt. The 
 	initial prompt in msh is msh > . (There is a space after the
 	 >.)
-*/
+
 /* setdir directoryName
 	This command changes the current directory to directoryName. 
 	See the getwd(3) and chdir(2) system calls. the required 
 	parameter directoryName may be either absolute (starting with /) 
 	or relative (not starting with /). 
 */
-void setdir(string dirName) {
-	if (dirName[0] == "/") { //check if dirName is an absolute parameter
+void setdir(char* dirName) {
+	if (strcmp(dirName[0], "/") == 0) { //check if dirName is an absolute parameter
 		chdir(dirName);
 	} else { // if we have a relative parameter in dirName
-		char *getwd(char *path_name);
-		dirName = path_name + dirName;
+		char currentPath[VARLENGTH];
+		getcwd(currentPath, VARLENGTH);
+		dirName = strcat(currentPath,dirName);
 		chdir(dirName);
 	}
 }
@@ -51,7 +57,7 @@ void setdir(string dirName) {
 	 external programs like ps to create its output.
 */
 void showprocs() {
-
+	
 }
 /*done value
 	msh exits. If the value parameter is present, it must be 
@@ -60,6 +66,13 @@ void showprocs() {
 	with status 0. msh also accepts <control-D> (end-of-file) 
 	on the input stream and treats it like done 0.
 */
+void done(int param){
+	int status = 0;
+	if (param < 0) {
+		status = param;
+	}
+	exit(1);
+}
 
 /* run cmd [param ... ]
 	(The brackets indicate "optional" and the dots indicate "and 
@@ -71,8 +84,10 @@ void showprocs() {
 	specifying parameters. msh should wait for the program to 
 	finish before it prompts for and accepts the next command.
 */
-void run(int param, string param1) {
-	int system(const cha *command);
+void run(char* cmd, char* param) {
+	char* args[] = {cmd, param, NULL};
+	execvp(args[0],args);
+//	waitpid();
 }
 /*fly cmd [param ... ]
 	The fly command is identical to the run command, except that
@@ -80,16 +95,30 @@ void run(int param, string param1) {
 	that is, msh should immediately prompt for and accept the 
 	next command.
 */
- void fly(string command) {
+void fly(char* cmd, char* param) {
+//	fork();
+	char* args[] = {cmd, param, NULL};
+	execvp(args[0],args);
+}
 
- }
-/*
-tovar variable cmd [param ... ]
+/*tovar variable cmd [param ... ]
 	The tovar command executes the program cmd along with its 
 	parameters, if any, just like the run command. However, msh 
 	absorbs the standard output of the program and assigns it as 
 	the value of variable specified by the second token.
 */
-void tovar(string varName, string command) {
+void tovar(char* varName, char* cmd) {
+	char* args[] = {varName, cmd, NULL];
+	execvp(args[0],args);
+//	waitpid();
+}
 
+int main(){
+	//run("ls", "-la");
+//	setdir("../");
+//	printf("\n\n");
+//	run("ls", "-la");
+	setvar("Variable","20");
+	
+	return 0;
 }
