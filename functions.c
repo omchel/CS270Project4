@@ -19,15 +19,23 @@
 */
 void setvar(char* varName, char* val){
 	regex_t exp;
+	char msgbuf[100];
 	char var1Letter = regcomp(&exp, "-?[a-zA-z]", 1); //regular expression (A-Z, locks sensitive)
-	if (var1Letter){//check if there is the first thing in the variable name is a letter (if it matches)
-		return;
+	if (!var1Letter){//check if there is the first thing in the variable name is a letter (if it matches)
+		var1Letter = regex(&exp, varName, 0, NULL, 0);
+		if (!var1Letter){
+			if (sizeOf(val) < VARLENGTH){
+				setenv varName  val;
+				printf("Variable created: %s, %s", varName, val);
+			}
+		} else if (var1Letter) {
+			printf("The variable name must start with a letter.\n");
+		} else {
+			regerror(reti, &regex, msgbuf, sizeof(msgbuf));
+			fprintf(stderr, "Regex match failed: %s\n", msgbuf);
+			exit(1);
+		}
 	}
-	if (sizeOf(val) > VARLENGTH){
-		return;
-	}
-	set -e varName  val;
-	printf("Variable created: %s, %s", varName, val);
 }
 /* setprompt newPrompt
 	Set the shell prompt to newPrompt, which is a token. Do not 
@@ -57,7 +65,7 @@ void setdir(char* dirName) {
 	 external programs like ps to create its output.
 */
 void showprocs() {
-	
+// to keep the pids of the created childs?	
 }
 /*done value
 	msh exits. If the value parameter is present, it must be 
