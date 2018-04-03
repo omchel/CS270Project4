@@ -18,7 +18,7 @@
 	this command is to associate the variable name with 
 	the given value in a data structure inside msh.
 */
-void setvar(char* varName, char* val){
+/*void setvar(char* varName, char* val){
 	regex_t exp;
 	char msgbuf[100];
 	char var1Letter = regcomp(&exp, "-?[a-zA-z]", 1); //regular expression (A-Z, locks sensitive)
@@ -50,14 +50,20 @@ void setvar(char* varName, char* val){
 	parameter directoryName may be either absolute (starting with /) 
 	or relative (not starting with /). 
 */
-void setdir(char* dirName) {
-	if (strcmp(dirName[0], "/") == 0) { //check if dirName is an absolute parameter
+void setdir(char dirName[]) {
+	if (dirName[0] == '/') { //check if dirName is an absolute parameter
 		chdir(dirName);
+		fprintf(stdout, "New working dir: %s\n", dirName);
 	} else { // if we have a relative parameter in dirName
 		char currentPath[VARLENGTH];
-		getcwd(currentPath, VARLENGTH);
-		dirName = strcat(currentPath,dirName);
-		chdir(dirName);
+		if (getcwd(currentPath, VARLENGTH)) {
+			fprintf(stdout, "Current working dir: %s\n", currentPath);
+			dirName = strcat(currentPath,dirName);
+			chdir(dirName);
+			fprintf(stdout, "New working dir: %s\n", dirName);
+		} else {
+			perror("getcwd() error");
+		}
 	}
 }
 /* showprocs
@@ -75,7 +81,7 @@ void showprocs() {
 	with status 0. msh also accepts <control-D> (end-of-file) 
 	on the input stream and treats it like done 0.
 */
-void done(int param){
+/*void done(int param){
 	int status = 0;
 	if (param < 0) {
 		status = param;
@@ -104,7 +110,7 @@ void run(char* cmd, char* param) {
 	that is, msh should immediately prompt for and accept the 
 	next command.
 */
-void fly(char* cmd, char* param) {
+/*void fly(char* cmd, char* param) {
 	pid_t pid;
 	pid = fork();
 }
@@ -115,18 +121,18 @@ void fly(char* cmd, char* param) {
 	absorbs the standard output of the program and assigns it as 
 	the value of variable specified by the second token.
 */
-void tovar(char* varName, char* cmd) {
+/*void tovar(char* varName, char* cmd) {
 	char* args[] = {varName, cmd, NULL];
 	execvp(args[0],args);
 //	waitpid();
-}
+}*/
 
 int main(){
 	//run("ls", "-la");
-//	setdir("../");
-//	printf("\n\n");
+	setdir("^HOME");
+	printf("\n\n");
 //	run("ls", "-la");
-	setvar("Variable","20");
+//	setvar("Variable","20");
 	
 	return 0;
 }
