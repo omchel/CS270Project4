@@ -1,5 +1,4 @@
-
-#include <string.h>
+y#include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -105,8 +104,8 @@ void run(char* cmd, char* param) {
 	next command.
 */
 void fly(char* cmd, char* param) {
-	pid_t pid;
-	pid = fork();
+	char* args[] = {cmd, param, NULL};
+	fork(args[0],args);
 }
 
 /*tovar variable cmd [param ... ]
