@@ -51,19 +51,32 @@
 	or relative (not starting with /). 
 */
 void setdir(char dirName[]) {
-	if (dirName[0] == '/') { //check if dirName is an absolute parameter
-		chdir(dirName);
-		fprintf(stdout, "New working dir: %s\n", dirName);
+	char cwd[VARLENGTH];
+	char nwd[VARLENGTH];
+	if (dirName[0] == '/') { //check if we have an absolute path
+	  if (chdir(dirName) != 0) //if we fail changing the current working directory
+	    perror("chdir() error()"); //print proper error message
+	  else { //changed the cwd successfully
+	    if (getcwd(cwd, sizeof(cwd)) == NULL) //check if getting the cwd failed
+	      perror("getcwd() error"); //print proper error message
+	    else
+	      printf("current working directory is: %s\n", cwd); // print new cwd
+	  }
 	} else { // if we have a relative parameter in dirName
-		char currentPath[VARLENGTH];
-		if (getcwd(currentPath, VARLENGTH)) {
-			fprintf(stdout, "Current working dir: %s\n", currentPath);
-			dirName = strcat(currentPath,dirName);
-			chdir(dirName);
-			fprintf(stdout, "New working dir: %s\n", dirName);
-		} else {
-			perror("getcwd() error");
-		}
+		if (getcwd(cwd, sizeof(cwd)) != NULL) { // if we successfully retrived cwd
+			fprintf(stdout, "Current working dir: %s\n", cwd);
+			cwd[strlen(cwd)] = '/';
+			dirName = strcat(cwd,dirName); // append the cwd and the relative path name
+			printf("dirName = %s\n", dirName); 
+			if (chdir(dirName) != 0)
+			    perror("chdir() error()");
+			else {
+			    if (getcwd(nwd, sizeof(nwd)) == NULL) // check if the change in cwd failed
+			      perror("getcwd() error");
+			    else
+			      printf("New working directory is: %s\n", nwd);
+			  }
+			}
 	}
 }
 /* showprocs
@@ -129,9 +142,10 @@ void run(char* cmd, char* param) {
 
 int main(){
 	//run("ls", "-la");
-	setdir("^HOME");
-	printf("\n\n");
-//	run("ls", "-la");
+	setdir("empty");
+	printf("\n");
+	setdir("/home/cor228");
+//	run("ls", "-a");
 //	setvar("Variable","20");
 	
 	return 0;
