@@ -1,3 +1,10 @@
+/*
+  CS270Project4
+  Systems Programming Project 4
+
+  Authors: Kenton Carrier and Chelina Ortiz Montanez
+*/
+
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -8,6 +15,10 @@
 #define BUF_LEN 255
 #define tokDelim " -"
 
+/* function scanInput:
+  Retrieves the user input and separates in into tokens.
+  Determines how to parse the commands given.
+*/
 int scanInput(char *userInput, char **tokens) {
 
   char* scanString;
@@ -16,7 +27,7 @@ int scanInput(char *userInput, char **tokens) {
   strtok(userInput, "#"); //Check for comments first
   scanString = strtok(userInput, tokDelim);
   //Uses the remaining string as the new prompt
-  if (strcmp(scanString, "setprompt") == 0){
+  if (strcmp(scanString, "setprompt") == 0){ // if the command given was 'setpromt'
 
     while (scanString != NULL){
 
@@ -27,7 +38,7 @@ int scanInput(char *userInput, char **tokens) {
     }
 
   }
-  else if (strcmp(scanString, "done") == 0){
+  else if (strcmp(scanString, "done") == 0){ // if the command given was 'done'
 
     while (scanString != NULL){
 
@@ -38,7 +49,7 @@ int scanInput(char *userInput, char **tokens) {
     }
 
   }
-  else if(strcmp(scanString, "setvar") == 0){
+  else if(strcmp(scanString, "setvar") == 0){ // if the command given was 'setvar'
 
     tokens[0] = scanString;
     tokens[1] = strtok(NULL, " ");
@@ -62,7 +73,11 @@ int scanInput(char *userInput, char **tokens) {
   return i;
 
 }
-
+/* checkVars function:
+  checks to see if the user inputs a vaiable to use, then
+  finds it in the structure and if it is sucessful, it 
+  returns the value stored in that variable.
+*/
 void checkVars(char** tokens, int numTokens, struct newVar* vars, int numVars) {
 
   for (int i = 0; i < numVars; i++){
@@ -73,7 +88,7 @@ void checkVars(char** tokens, int numTokens, struct newVar* vars, int numVars) {
       strcpy(varName, tokens[j]);
       strcpy(varName, strtok(varName, "^"));
 
-      if (strcmp(varName, vars[i].name) == 0)
+      if (strcmp(varName, vars[i].name) == 0) // if we can match the user input with an existing variable
         tokens[j] = vars[i].valStr;
 
     }
@@ -81,20 +96,22 @@ void checkVars(char** tokens, int numTokens, struct newVar* vars, int numVars) {
   }
 
 }
-
+/* checkProcs function:
+  cheks if any of the background processes is not finished.
+*/
 int checkProcs(int numProcs, struct proc* currentProcs) {
 
   int childIndex;
   pid_t finishedProc;
 
   finishedProc = waitpid(-1, 0, WNOHANG);
-  if (finishedProc != 0) {
+  if (finishedProc != 0) { // if there are processes running in the background
 
     for (int i = 0; i < numProcs; i++) {
 
       if (currentProcs[i].pID == finishedProc){
 
-        printf("Process finished: %s\n", currentProcs[i].pName);
+        printf("Process finished: %s\n", currentProcs[i].pName); // list the processes still running 
         for (int j = i; j < numProcs; j++) {
           currentProcs[j] = currentProcs[j+1];
         }
@@ -108,7 +125,7 @@ int checkProcs(int numProcs, struct proc* currentProcs) {
   return numProcs;
 
 }
-
+// main
 int main() {
 
   struct proc procs[BUF_LEN];
@@ -122,14 +139,14 @@ int main() {
 
   while (true) {
 
-    numProcs = checkProcs(numProcs, procs);
+    numProcs = checkProcs(numProcs, procs); // check proceses running on the background every time there is a new command
 
     printf("%s", prompt);
     fgets(input, BUF_LEN, stdin);
     input[strlen(input)-1] = '\0'; // Removes trailing \n from stdin. From exectest.c by Raphael Finkel
     numTokens = scanInput(input, tokens);
     checkVars(tokens, numTokens, vars, numVars);
-
+    // check the user input and determine which function is being asked to do 
     if (strcmp(tokens[0], "setprompt") == 0)
       strcpy(prompt, tokens[1]);
     else if (strcmp(tokens[0], "done") == 0)
